@@ -1,5 +1,6 @@
 package org.fantasizer.web.rest;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.fantasizer.FantasizerflowApp;
 import org.fantasizer.domain.Authority;
 import org.fantasizer.domain.User;
@@ -7,11 +8,10 @@ import org.fantasizer.repository.UserRepository;
 import org.fantasizer.security.AuthoritiesConstants;
 import org.fantasizer.service.MailService;
 import org.fantasizer.service.UserService;
+import org.fantasizer.service.convertor.UserConvertor;
 import org.fantasizer.service.dto.UserDTO;
-import org.fantasizer.service.mapper.UserMapper;
 import org.fantasizer.web.rest.errors.ExceptionTranslator;
 import org.fantasizer.web.rest.vm.ManagedUserVM;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,7 +29,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import java.time.Instant;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -79,7 +82,7 @@ public class UserResourceIntTest {
     private UserService userService;
 
     @Autowired
-    private UserMapper userMapper;
+    private UserConvertor userConvertor;
 
     @Autowired
     private MappingJackson2HttpMessageConverter jacksonMessageConverter;
@@ -524,8 +527,8 @@ public class UserResourceIntTest {
 
     @Test
     public void testUserFromId() {
-        assertThat(userMapper.userFromId(DEFAULT_ID).getId()).isEqualTo(DEFAULT_ID);
-        assertThat(userMapper.userFromId(null)).isNull();
+        assertThat(userConvertor.userFromId(DEFAULT_ID).getId()).isEqualTo(DEFAULT_ID);
+        assertThat(userConvertor.userFromId(null)).isNull();
     }
 
     @Test
@@ -543,7 +546,7 @@ public class UserResourceIntTest {
         userDTO.setLastModifiedBy(DEFAULT_LOGIN);
         userDTO.setAuthorities(Collections.singleton(AuthoritiesConstants.USER));
 
-        User user = userMapper.userDTOToUser(userDTO);
+        User user = userConvertor.userDTOToUser(userDTO);
         assertThat(user.getId()).isEqualTo(DEFAULT_ID);
         assertThat(user.getLogin()).isEqualTo(DEFAULT_LOGIN);
         assertThat(user.getFirstName()).isEqualTo(DEFAULT_FIRSTNAME);
@@ -572,7 +575,7 @@ public class UserResourceIntTest {
         authorities.add(authority);
         user.setAuthorities(authorities);
 
-        UserDTO userDTO = userMapper.userToUserDTO(user);
+        UserDTO userDTO = userConvertor.userToUserDTO(user);
 
         assertThat(userDTO.getId()).isEqualTo(DEFAULT_ID);
         assertThat(userDTO.getLogin()).isEqualTo(DEFAULT_LOGIN);
